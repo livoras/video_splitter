@@ -7,7 +7,7 @@ import tempfile
 from datetime import datetime
 import io
 import argparse
-from dov import DinoSimilarity
+from .dov import DinoSimilarity
 
 class VideoSplitter:
     def __init__(self, video_path, output_dir=None, similarity_threshold=0.7, min_segment_frames=0, progress_callback=None):
