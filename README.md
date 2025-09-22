@@ -6,8 +6,9 @@ Automatically splits videos into segments based on scene changes. Uses tradition
 
 - **Smart Scene Detection**: Combines phash and DINOv2 model for accurate scene transition identification
 - **Dual Verification**: Prevents false positives by filtering subtle changes in similar scenes
-- **Flexible Configuration**: Supports custom similarity thresholds, output paths, and other parameters
-- **Progress Display**: Real-time processing progress and detection results
+- **Auto Temp Directory**: Creates timestamped directories when no output path specified
+- **Programmatic API**: Use as Python library with detailed results and progress callbacks
+- **Flexible Configuration**: Supports custom similarity thresholds and parameters
 
 ## Installation
 
@@ -17,34 +18,72 @@ pip install opencv-python imagehash pillow numpy torch transformers
 
 ## Usage
 
-### Basic Usage
+### API Usage (Recommended)
+```python
+from video_splitter import VideoSplitter
+
+# Simplest usage - auto temp directory
+splitter = VideoSplitter("video.mp4")
+result = splitter.process()
+print(f"Files saved to: {result['output_dir']}")
+
+# With progress callback
+def on_progress(current, total):
+    print(f"Progress: {current}/{total}")
+
+splitter = VideoSplitter("video.mp4", progress_callback=on_progress)
+result = splitter.process()
+
+# Analysis only (no file output)
+result = splitter.analyze()
+for segment in result['segments']:
+    print(f"Segment {segment['index']}: {segment['file_path']}")
+```
+
+### Command Line Usage
 ```bash
+# Auto temp directory
 python video_splitter.py input.mp4
-```
 
-### Specify Output Directory
-```bash
+# Specify output directory
 python video_splitter.py input.mp4 -o output_folder
-```
 
-### Adjust Parameters
-```bash
-python video_splitter.py input.mp4 -t 0.85 -m 30 -o segments
+# Adjust parameters
+python video_splitter.py input.mp4 -t 0.85 -m 30
 ```
 
 ### Parameters
 - `video_path`: Input video file path (required)
-- `-o, --output`: Output directory (default: video_segments)
-- `-t, --threshold`: Similarity threshold, 0-1 range (default: 0.80)
-- `-m, --min-frames`: Minimum segment frames (default: 0)
+- `output_dir`: Output directory (default: auto temp directory)
+- `similarity_threshold`: Similarity threshold, 0-1 range (default: 0.80)
+- `progress_callback`: Function to monitor progress (API only)
 
 ## Output
 
-The program generates numbered MP4 files in the specified directory:
-- `segment_000.mp4`
-- `segment_001.mp4`
-- `segment_002.mp4`
-- ...
+### Files
+Generated MP4 files in output directory:
+- `segment_000.mp4`, `segment_001.mp4`, `segment_002.mp4`...
+
+### API Results
+```python
+{
+    'video_path': 'input.mp4',
+    'output_dir': '/tmp/video_segments_20250922_170046',
+    'total_frames': 748,
+    'fps': 30.0,
+    'duration': 24.93,
+    'segment_count': 21,
+    'segments': [
+        {
+            'index': 0,
+            'file_path': '/tmp/.../segment_000.mp4',
+            'start_frame': 0, 'end_frame': 66,
+            'start_time': 0.0, 'end_time': 2.2,
+            'frame_count': 66
+        }
+    ]
+}
+```
 
 ## Technical Approach
 
@@ -56,4 +95,3 @@ The program generates numbered MP4 files in the specified directory:
 
 - `video_splitter.py`: Main program for video splitting functionality
 - `dov.py`: DINOv2 similarity calculation module
-- `main.py`: Browser automation script (independent feature)
