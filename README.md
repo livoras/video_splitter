@@ -12,6 +12,12 @@ Automatically splits videos into segments based on scene changes. Uses tradition
 
 ## Installation
 
+### From GitHub (Recommended)
+```bash
+pip install git+https://github.com/livoras/video_splitter.git
+```
+
+### Manual Dependencies (if needed)
 ```bash
 pip install opencv-python imagehash pillow numpy torch transformers
 ```
