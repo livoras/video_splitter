@@ -8,6 +8,7 @@ Automatically splits videos into segments based on scene changes. Uses tradition
 - **Dual Verification**: Prevents false positives by filtering subtle changes in similar scenes
 - **Auto Temp Directory**: Creates timestamped directories when no output path specified
 - **Programmatic API**: Use as Python library with detailed results and progress callbacks
+- **Similarity Functions**: Standalone image similarity comparison using phash or DINO AI
 - **Flexible Configuration**: Supports custom similarity thresholds and parameters
 
 ## Installation
@@ -46,6 +47,31 @@ for segment in result['segments']:
     print(f"Segment {segment['index']}: {segment['file_path']}")
 ```
 
+### Similarity Functions
+```python
+from video_splitter_pkg import phash_similarity, dino_similarity
+
+# Compare two images using perceptual hash
+score1 = phash_similarity("image1.jpg", "image2.jpg")
+print(f"Perceptual hash similarity: {score1:.4f}")
+
+# Compare using AI model (more accurate)
+score2 = dino_similarity("image1.jpg", "image2.jpg")
+print(f"DINO AI similarity: {score2:.4f}")
+
+# Support multiple input types
+from PIL import Image
+import cv2
+
+img1 = Image.open("photo1.jpg")           # PIL Image
+img2 = cv2.imread("photo2.jpg")           # OpenCV array
+path = "photo3.jpg"                       # File path
+
+# All input types work
+similarity = phash_similarity(img1, img2)
+similarity = dino_similarity(img2, path)
+```
+
 ### Command Line Usage
 ```bash
 # Auto temp directory
@@ -63,6 +89,12 @@ python video_splitter.py input.mp4 -t 0.85 -m 30
 - `output_dir`: Output directory (default: auto temp directory)
 - `similarity_threshold`: Similarity threshold, 0-1 range (default: 0.80)
 - `progress_callback`: Function to monitor progress (API only)
+
+### Similarity Functions Parameters
+- `phash_similarity(img1, img2)`: Fast perceptual hash comparison
+- `dino_similarity(img1, img2)`: AI-based semantic similarity
+- **Input types**: File paths, PIL Images, or OpenCV arrays
+- **Returns**: Float similarity score (0-1, higher = more similar)
 
 ## Output
 
